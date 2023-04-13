@@ -1,3 +1,10 @@
+### This is not what is run on Google Cloud Run
+# Instead, head over to old_west_main.py...
+
+# This is a secure version that doesn't require database credentials
+# Instead it has a login page
+# However, this is incompatible with serving realtime to ArcOnline
+
 import os
 import json
 import psycopg2
@@ -44,14 +51,14 @@ def get_data(pg_connection_dict, interp_name):
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/') # See flask forms
 def index():
     return render_template('index.html')
  
 @app.route('/data/', methods = ['POST', 'GET'])
 def data():
     if request.method == 'GET':
-        return f"The URL /data is accessed directly. Try going to '/' to submit form"
+        return f"The URL /data is accessed directly. Try going to base url to submit form"
     if request.method == 'POST':
         
         form_data = request.form
