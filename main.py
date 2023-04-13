@@ -60,8 +60,12 @@ def data():
         
         ## Database Credentials
 
-        pg_connection_dict = form_data
-        del pg_connection_dict['rast']
+        pg_connection_dict = {'dbname':form_data['dbname'],
+                              'user':form_data['user'],
+                              'password':form_data['password'],
+                              'port':form_data['port'],
+                              'host':form_data['host']}
+        
         
         #geojson = get_data(pg_connection_dict, interp_name)
         
