@@ -1,96 +1,82 @@
+### This is not what is run on Google Cloud Run
+# Instead, head over to main.py...
+
+# This is a secure version that doesn't require database credentials
+# Instead it has a login page
+# However, this is incompatible with serving realtime to ArcOnline
+
 import os
 import json
 import psycopg2
 from psycopg2 import sql, extras
-from flask import Flask, request
-
+from flask import Flask, request, render_template
 
 # Initialize
 
-## interpolation names
+# Interpolation Names
 
 interp_names = ['PM2_5_Kriging', 'Temp_Kriging', 'Elevation_Kriging', 
                 'PM2_5_Temp_Errors', 'Elevation_Errors']
 
-## Database Credentials
+# Functions
 
-cred_pth = os.path.join(os.getcwd(),'db_credentials_template.txt')
-
-with open(cred_pth, 'r') as f:
+def get_data(pg_connection_dict, interp_name):
     
-    creds = f.readlines()[0].rstrip('\n').split(', ')
+    conn = psycopg2.connect(**pg_connection_dict)
 
-pg_connection_dict = dict(zip(['dbname', 'user', 'password', 'port', 'host'], creds))
-    
-## Functions
-# The endpoints (routes) all do the same thing, 
-# just access different tables
+    # Create json cursor
+    cur = conn.cursor(cursor_factory = extras.RealDictCursor)
 
-endpoint_list = []
+    # Get the example as a Geojson
+    cmd = f"""SELECT json_build_object(
+'type', 'FeatureCollection',
+'features', json_agg(ST_AsGeoJSON({interp_name}.*)::json)
+) FROM {interp_name};"""
 
-for i, interp_name in enumerate(interp_names): # Table Names
-
-    ## Define the functions iteratively
-    ## See here
-    ## https://stackoverflow.com/questions/3431676/creating-functions-or-lambdas-in-a-loop-or-comprehension
-    
-    def f(interp_name=interp_name):
+    cur.execute(cmd) # Execute
         
-        conn = psycopg2.connect(**pg_connection_dict)
-
-        # Create json cursor
-        cur = conn.cursor(cursor_factory = extras.RealDictCursor)
-
-        # Get the example as a Geojson
-        cmd = f"""SELECT json_build_object(
-    'type', 'FeatureCollection',
-    'features', json_agg(ST_AsGeoJSON({interp_name}.*)::json)
-    ) FROM {interp_name};"""
-
-        cur.execute(cmd) # Execute
-
-        conn.commit() # Committ command
-
-        geojson = json.loads(json.dumps(cur.fetchall()))[0]["json_build_object"] # Unpack the response...
-        
-        ## ^ That's a dictionary
-
-        # Close connection
-        cur.close()
-        conn.close()
-
-        return geojson
-        
-    # Iteratively format endpoint dictionary 
-    # Hack from:
-    # Oooh, I lost the link...
+    conn.commit() # Committ command
+            
+    geojson = json.loads(json.dumps(cur.fetchall()))[0]["json_build_object"] # Unpack the response...       
     
-    endpoint = {
-                "route": "/"+interp_name,
-                "view_func": f
-                }
-    
-    endpoint_list.append(endpoint)    
-    
-    
-### THE APP                
+    ## ^ That's a dictionary
+
+    # Close connection
+    cur.close()
+    conn.close()
+
+    return geojson
+
+# The APP
 
 app = Flask(__name__)
 
-## Index
-
-@app.route("/")
+@app.route('/') # See flask forms
 def index():
-    
-    interp_string = '\n'.join(interp_names)
-    
-    return f'Please select your interpolation:\n\n{interp_string}\n\nAnd add one of these to the base url'    
-    
-# Create FLASK APPS from endpoints
-# https://flask.palletsprojects.com/en/2.0.x/api/
+    return render_template('index.html')
+ 
+@app.route('/data/', methods = ['POST', 'GET'])
+def data():
+    if request.method == 'GET':
+        return f"The URL /data is accessed directly. Try going to base url to submit form"
+    if request.method == 'POST':
+        
+        form_data = request.form
+        
+        interp_name = form_data['rast']
+        
+        ## Database Credentials
 
-for endpoint in endpoint_list:
-    app.add_url_rule(endpoint['route'], view_func=endpoint['view_func'])
-
+        pg_connection_dict = {'dbname':form_data['dbname'],
+                              'user':form_data['user'],
+                              'password':form_data['password'],
+                              'port':form_data['port'],
+                              'host':form_data['host']}
+        
+        
+        geojson = get_data(pg_connection_dict, interp_name)
+        
+        return geojson
+    
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
