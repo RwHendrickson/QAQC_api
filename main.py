@@ -9,8 +9,8 @@ from flask import Flask, request
 
 ## interpolation names
 
-interp_names = ['PM2_5_Kriging', 'Temp_Kriging', 'Elevation_Kriging', 
-                'PM2_5_Temp_Errors', 'Elevation_Errors']
+interp_names = ['PM2_5_Kriging', 'Temp_Kriging', 'elev_kriging', 
+                'PM2_5_Kriging_Errors', 'Temp_Kriging_Errors', 'elev_kriging_errors']
 
 ## Database Credentials
 
