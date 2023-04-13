@@ -67,9 +67,9 @@ def data():
                               'host':form_data['host']}
         
         
-        #geojson = get_data(pg_connection_dict, interp_name)
+        geojson = get_data(pg_connection_dict, interp_name)
         
-        return pg_connection_dict
+        return geojson
     
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
