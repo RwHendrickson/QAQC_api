@@ -61,9 +61,9 @@ def data():
         ## Database Credentials
 
         pg_connection_dict = form_data
-        pg_connection_dict.pop('rast')
+        #pg_connection_dict.pop('rast')
         
-        geojson = get_data(pg_connection_dict, interp_name)
+        #geojson = get_data(pg_connection_dict, interp_name)
         
         return pg_connection_dict
     
