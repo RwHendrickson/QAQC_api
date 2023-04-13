@@ -56,14 +56,14 @@ def data():
         
         form_data = request.form
         
-        #interp_name = form_data['rast']
+        interp_name = form_data['rast']
         
         ## Database Credentials
 
         pg_connection_dict = form_data
-        #pg_connection_dict.pop('rast')
+        pg_connection_dict.pop('rast')
         
-        #geojson = get_data(pg_connection_dict, interp_name)
+        geojson = get_data(pg_connection_dict, interp_name)
         
         return pg_connection_dict
     
