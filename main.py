@@ -70,6 +70,7 @@ def index():
 def data(page):
     if page in interp_names:
         response = get_data(pg_connection_dict, page)
+        return response
         
     else:
     
