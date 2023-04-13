@@ -26,52 +26,32 @@ pg_connection_dict = dict(zip(['dbname', 'user', 'password', 'port', 'host'], cr
 # The endpoints (routes) all do the same thing, 
 # just access different tables
 
-endpoint_list = []
+def get_data(pg_connection_dict, interp_name):
 
-for i, interp_name in enumerate(interp_names): # Table Names
+    conn = psycopg2.connect(**pg_connection_dict)
 
-    ## Define the functions iteratively
-    ## See here
-    ## https://stackoverflow.com/questions/3431676/creating-functions-or-lambdas-in-a-loop-or-comprehension
+    # Create json cursor
+    cur = conn.cursor(cursor_factory = extras.RealDictCursor)
+
+    # Get the example as a Geojson
+    cmd = f"""SELECT json_build_object(
+'type', 'FeatureCollection',
+'features', json_agg(ST_AsGeoJSON({interp_name}.*)::json)
+) FROM {interp_name};"""
+
+    cur.execute(cmd) # Execute
+
+    conn.commit() # Committ command
+
+    geojson = json.loads(json.dumps(cur.fetchall()))[0]["json_build_object"] # Unpack the response...
     
-    def f(interp_name=interp_name):
-        
-        conn = psycopg2.connect(**pg_connection_dict)
+    ## ^ That's a dictionary
 
-        # Create json cursor
-        cur = conn.cursor(cursor_factory = extras.RealDictCursor)
+    # Close connection
+    cur.close()
+    conn.close()
 
-        # Get the example as a Geojson
-        cmd = f"""SELECT json_build_object(
-    'type', 'FeatureCollection',
-    'features', json_agg(ST_AsGeoJSON({interp_name}.*)::json)
-    ) FROM {interp_name};"""
-
-        cur.execute(cmd) # Execute
-
-        conn.commit() # Committ command
-
-        geojson = json.loads(json.dumps(cur.fetchall()))[0]["json_build_object"] # Unpack the response...
-        
-        ## ^ That's a dictionary
-
-        # Close connection
-        cur.close()
-        conn.close()
-
-        return geojson
-        
-    # Iteratively format endpoint dictionary 
-    # Hack from:
-    # Oooh, I lost the link...
-    
-    endpoint = {
-                "route": "/"+interp_name,
-                "view_func": f
-                }
-    
-    endpoint_list.append(endpoint)    
-    
+    return geojson  
     
 ### THE APP                
 
@@ -86,11 +66,14 @@ def index():
     
     return f'Please select your interpolation:\n\n{interp_string}\n\nAnd add one of these to the base url'    
     
-# Create FLASK APPS from endpoints
-# https://flask.palletsprojects.com/en/2.0.x/api/
-
-for endpoint in endpoint_list:
-    app.add_url_rule(endpoint['route'], view_func=endpoint['view_func'])
+@app.route("/<page>")
+def data(page):
+    if page in interp_names:
+        response = get_data(pg_connection_dict, page)
+        
+    else:
+    
+        return 'ERROR. No Dataset Matches your request'
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
