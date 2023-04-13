@@ -22,10 +22,10 @@ def data():
         
         ## Database Credentials
 
-        pg_connection_dict = form_data
+        #pg_connection_dict = json.loads(form_data)
         
         
-        return form_data
+        return f'{type(form_data)}'
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
