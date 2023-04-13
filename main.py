@@ -3,7 +3,12 @@ import json
 import psycopg2
 from psycopg2 import sql, extras
 from flask import Flask, request, render_template
- 
+
+
+# The APP
+
+app = Flask(__name__)
+
 @app.route('/')
 def index():
     return render_template('index.html')
