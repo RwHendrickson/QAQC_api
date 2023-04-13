@@ -63,7 +63,9 @@ def data():
         pg_connection_dict = form_data
         pg_connection_dict.pop('rast')
         
-        return get_data(pg_connection_dict, interp_name)
-
+        #geojson = get_data(pg_connection_dict, interp_name)
+        
+        return pg_connection_dict
+    
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
