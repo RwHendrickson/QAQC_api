@@ -25,21 +25,12 @@ def get_data(pg_connection_dict, interp_name):
 'type', 'FeatureCollection',
 'features', json_agg(ST_AsGeoJSON({interp_name}.*)::json)
 ) FROM {interp_name};"""
-    try:
-        cur.execute(cmd) # Execute
-        
-        conn.commit() # Committ command
-        
-    except:
-        
-        geojson = 'Command committed'
-        
-        try:
-            
-            geojson = json.loads(json.dumps(cur.fetchall()))[0]["json_build_object"] # Unpack the response...
 
+    cur.execute(cmd) # Execute
         
-        
+    conn.commit() # Committ command
+            
+    geojson = json.loads(json.dumps(cur.fetchall()))[0]["json_build_object"] # Unpack the response...       
     
     ## ^ That's a dictionary
 
