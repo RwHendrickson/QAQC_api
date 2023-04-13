@@ -6,10 +6,15 @@ RwHendrickson/QAQC_api
 
 Select Dockerfile as your build type. Allow unauthenticated invocations.
 
-## 2)  Set up Secure Virtual Machine (To Do...)
+## 2) TO DO Another Time... Set up Secure Virtual Machine
 
-Follow the README at https://github.com/RTGS-Lab/QualityAirQualityCities/tree/main/api/
+# Cloud Run Setup
 
+Here is a "how to" set up a remote machine for the Community Air Monitoring Project
 
+## Download the code (WRONG)
 
+On you remote machine, download the code with something like this line:
+
+wget -m https://github.com/RTGS-Lab/QualityAirQualityCities/trunk/api
 
