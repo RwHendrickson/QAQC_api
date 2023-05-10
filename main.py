@@ -12,7 +12,8 @@ from flask import Flask, request
 interp_names = ['PM2_5_Kriging', 'Temp_Kriging', 'elev_kriging', 
                 'PM2_5_Kriging_Errors', 'Temp_Kriging_Errors', 'elev_kriging_errors', 'PM2_5_All_May8', 'PM2_5_Errors_All_May8',
                 'PM2_5_Spring_May8', 'PM2_5_Errors_Spring_May8',
-                'PM2_5_Summer_May8', 'PM2_5_Errors_Summer_May8']
+                'PM2_5_Summer_May8', 'PM2_5_Errors_Summer_May8',
+                'originalPm2_5', 'mean_Presence']
 
 ## Database Credentials
 
